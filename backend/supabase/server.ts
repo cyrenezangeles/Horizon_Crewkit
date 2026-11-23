@@ -21,8 +21,8 @@ export async function createClient() {
             cookieStore.set(name, value, options),
           );
         } catch {
-          // Server Components cannot write cookies. The proxy refreshes the
-          // session on the next request, so this is safe to ignore.
+          // Server Components cannot write cookies. Refreshes are written by
+          // Server Actions, where the cookie store is mutable.
         }
       },
     },

@@ -1,5 +1,6 @@
 import "server-only";
 
+import { getCacheNow } from "@/backend/cache-time";
 import { createClient } from "@/backend/supabase/server";
 import type {
   ArticleDetail,
@@ -28,9 +29,10 @@ let categoriesCache: { value: Category[]; expiresAt: number } | null = null;
 let tagsCache: { value: Tag[]; expiresAt: number } | null = null;
 
 export async function getCategories(): Promise<Category[]> {
+  const now = await getCacheNow();
   const supabase = await createClient();
 
-  if (categoriesCache && categoriesCache.expiresAt > Date.now()) {
+  if (categoriesCache && categoriesCache.expiresAt > now) {
     return categoriesCache.value;
   }
 
@@ -47,7 +49,7 @@ export async function getCategories(): Promise<Category[]> {
   const categories = (data as Category[]) ?? [];
   categoriesCache = {
     value: categories,
-    expiresAt: Date.now() + REFERENCE_TTL_MS,
+    expiresAt: now + REFERENCE_TTL_MS,
   };
 
   return categories;
@@ -58,9 +60,10 @@ export function invalidateCategoriesCache() {
 }
 
 export async function getTags(): Promise<Tag[]> {
+  const now = await getCacheNow();
   const supabase = await createClient();
 
-  if (tagsCache && tagsCache.expiresAt > Date.now()) {
+  if (tagsCache && tagsCache.expiresAt > now) {
     return tagsCache.value;
   }
 
@@ -74,7 +77,7 @@ export async function getTags(): Promise<Tag[]> {
   }
 
   const tags = (data as Tag[]) ?? [];
-  tagsCache = { value: tags, expiresAt: Date.now() + REFERENCE_TTL_MS };
+  tagsCache = { value: tags, expiresAt: now + REFERENCE_TTL_MS };
 
   return tags;
 }

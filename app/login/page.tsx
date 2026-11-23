@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { BookOpenCheck, LifeBuoy, ShieldCheck, Sparkles } from "lucide-react";
+import { BookOpenCheck, LifeBuoy, ShieldCheck } from "lucide-react";
 import { Brand, CrewkitMark } from "@/frontend/components/brand";
 import { isSupabaseConfigured } from "@/backend/supabase/config";
 import { LoginForm } from "@/frontend/components/login-form";
@@ -7,6 +7,8 @@ import { LoginForm } from "@/frontend/components/login-form";
 export const metadata: Metadata = {
   title: "Sign in",
 };
+
+export const instant = false;
 
 export default async function LoginPage({
   searchParams,
@@ -28,10 +30,6 @@ export default async function LoginPage({
         <Brand href="/login" inverted className="relative" />
 
         <div className="relative space-y-7">
-          <div className="inline-flex items-center gap-2 rounded-full border border-white/25 bg-white/10 px-3.5 py-1.5 text-sm font-medium text-blue-50">
-            <Sparkles className="h-4 w-4" />
-            Answers first, tickets second
-          </div>
           <h1 className="max-w-md text-4xl font-semibold leading-tight tracking-tight">
             Everything your team needs, in one calm place.
           </h1>

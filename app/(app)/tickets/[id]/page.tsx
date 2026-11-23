@@ -28,7 +28,8 @@ import {
   TICKET_STATUS_LABELS,
   type TicketPerson,
 } from "@/backend/types";
-import { cn, formatDate, initials, timeAgo } from "@/frontend/lib/utils";
+import { cn, formatDate, initials } from "@/frontend/lib/utils";
+import { RelativeTime } from "@/frontend/components/relative-time";
 import { ReplyForm } from "@/frontend/components/reply-form";
 import { TicketControls } from "@/frontend/components/ticket-controls";
 
@@ -124,7 +125,9 @@ export default async function TicketDetailPage({
             <CalendarDays className="h-3.5 w-3.5 text-blue-500" />
             Opened {formatDate(ticket.created_at)}
           </span>
-          <span>Updated {timeAgo(ticket.updated_at)}</span>
+          <span>
+            Updated <RelativeTime value={ticket.updated_at} />
+          </span>
         </div>
       </div>
 
@@ -207,7 +210,7 @@ export default async function TicketDetailPage({
                             ) : null}
                           </p>
                           <p className="text-[11px] text-slate-400">
-                            {timeAgo(message.created_at)} &middot;{" "}
+                            <RelativeTime value={message.created_at} /> &middot;{" "}
                             {formatDate(message.created_at)}
                           </p>
                         </div>

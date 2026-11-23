@@ -62,27 +62,24 @@ const hrItems: NavItem[] = [
     icon: Library,
     isActive: (pathname) => pathname.startsWith("/admin/articles"),
   },
-  {
-    href: "/kb",
-    label: "Knowledge base",
-    icon: BookOpen,
-    isActive: (pathname) => pathname === "/kb" || pathname.startsWith("/kb/"),
-  },
 ];
 
 export function NavLinks({
   role,
   orientation = "vertical",
   collapsed = false,
+  inverted = false,
   className,
 }: {
   role: AppRole;
-  orientation?: "vertical" | "horizontal";
+  orientation?: "vertical" | "horizontal" | "bottom";
   collapsed?: boolean;
+  inverted?: boolean;
   className?: string;
 }) {
   const pathname = usePathname();
   const isVertical = orientation === "vertical";
+  const isBottom = orientation === "bottom";
   const compact = collapsed && isVertical;
   const items = role === "hr" ? hrItems : employeeItems;
 
@@ -91,7 +88,9 @@ export function NavLinks({
       className={cn(
         isVertical
           ? "flex flex-col gap-1"
-          : "flex items-center gap-1 overflow-x-auto",
+          : isBottom
+            ? "flex items-center justify-around gap-1"
+            : "flex items-center gap-1 overflow-x-auto",
         className,
       )}
     >
@@ -106,17 +105,40 @@ export function NavLinks({
             title={compact ? item.label : undefined}
             aria-label={compact ? item.label : undefined}
             className={cn(
-              "focus-ring flex shrink-0 items-center gap-2.5 rounded-xl px-3 py-2.5 text-sm font-medium transition",
+              "focus-ring shrink-0 rounded-xl font-medium transition",
+              isBottom
+                ? "flex min-w-0 flex-1 flex-col items-center justify-center gap-1 px-1 py-2 text-[10px] leading-none"
+                : "flex items-center gap-2.5 px-3 py-2.5 text-sm",
               compact && "justify-center px-2",
               active
-                ? "bg-blue-600 text-white shadow-[0_10px_24px_-14px_rgba(37,99,235,0.9)]"
-                : "text-slate-600 hover:bg-white/80 hover:text-slate-900",
+                ? inverted
+                  ? "bg-white text-blue-700 shadow-[0_10px_24px_-14px_rgba(15,23,42,0.65)]"
+                  : "bg-blue-600 text-white shadow-[0_10px_24px_-14px_rgba(37,99,235,0.9)]"
+                : inverted
+                  ? "text-blue-100 hover:bg-white/15 hover:text-white"
+                  : "text-slate-600 hover:bg-white/80 hover:text-slate-900",
             )}
           >
             <Icon
-              className={cn("h-4 w-4", active ? "text-white" : "text-slate-400")}
+              className={cn(
+                isBottom ? "h-5 w-5" : "h-4 w-4",
+                active
+                  ? inverted
+                    ? "text-blue-700"
+                    : "text-white"
+                  : inverted
+                    ? "text-blue-200"
+                    : "text-slate-400",
+              )}
             />
-            <span className={compact ? "sr-only" : undefined}>{item.label}</span>
+            <span
+              className={cn(
+                compact && "sr-only",
+                isBottom && "max-w-full truncate text-center",
+              )}
+            >
+              {item.label}
+            </span>
           </Link>
         );
       })}

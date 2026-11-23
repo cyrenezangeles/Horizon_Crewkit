@@ -18,7 +18,8 @@ import {
   getCategories,
   getRelatedArticles,
 } from "@/backend/data/kb";
-import { formatDate, timeAgo } from "@/frontend/lib/utils";
+import { formatDate } from "@/frontend/lib/utils";
+import { RelativeTime } from "@/frontend/components/relative-time";
 import { ArticleFeedback } from "@/frontend/components/feedback";
 import { ArticleViewTracker } from "@/frontend/components/article-view-tracker";
 
@@ -113,7 +114,7 @@ export default async function ArticlePage({
             <div className="mt-5 flex flex-wrap items-center gap-x-4 gap-y-2 text-xs text-slate-500">
               <span className="inline-flex items-center gap-1.5">
                 <RefreshCw className="h-3.5 w-3.5 text-blue-500" />
-                Updated {timeAgo(article.updated_at)}
+                Updated <RelativeTime value={article.updated_at} />
               </span>
               <span className="inline-flex items-center gap-1.5">
                 <Clock className="h-3.5 w-3.5 text-blue-500" />
@@ -194,7 +195,7 @@ export default async function ArticlePage({
                         {item.title}
                       </span>
                       <span className="mt-0.5 block text-[11px] text-slate-400">
-                        Updated {timeAgo(item.updated_at)}
+                        Updated <RelativeTime value={item.updated_at} />
                       </span>
                     </span>
                   </Link>

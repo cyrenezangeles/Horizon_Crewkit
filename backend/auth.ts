@@ -1,7 +1,10 @@
 import "server-only";
 
+import { combineChunks, stringFromBase64URL } from "@supabase/ssr";
+import { cookies } from "next/headers";
 import { cacheLife } from "next/cache";
 import { redirect } from "next/navigation";
+import { getCacheNow } from "@/backend/cache-time";
 import { createClient } from "@/backend/supabase/server";
 import { isSupabaseConfigured } from "@/backend/supabase/config";
 import type { Profile, SessionUser } from "@/backend/types";
@@ -23,8 +26,9 @@ async function loadProfile(
   supabase: DbClient,
   id: string,
 ): Promise<Profile | null> {
+  const now = await getCacheNow();
   const cached = profileCache.get(id);
-  if (cached && cached.expiresAt > Date.now()) {
+  if (cached && cached.expiresAt > now) {
     return cached.profile;
   }
 
@@ -39,11 +43,48 @@ async function loadProfile(
   if (profile) {
     profileCache.set(id, {
       profile,
-      expiresAt: Date.now() + PROFILE_TTL_MS,
+      expiresAt: now + PROFILE_TTL_MS,
     });
   }
 
   return profile;
+}
+
+async function getAccessToken(): Promise<string | null> {
+  const authCookies = (await cookies()).getAll();
+  const storageKeys = new Set<string>();
+
+  for (const cookie of authCookies) {
+    const match = cookie.name.match(/^(.*-auth-token)(?:\.\d+)?$/);
+    if (match) {
+      storageKeys.add(match[1]);
+    }
+  }
+
+  for (const storageKey of storageKeys) {
+    const rawValue = await combineChunks(storageKey, (name) =>
+      authCookies.find((cookie) => cookie.name === name)?.value ?? null,
+    );
+
+    if (!rawValue) {
+      continue;
+    }
+
+    const value = rawValue.startsWith("base64-")
+      ? stringFromBase64URL(rawValue.slice("base64-".length))
+      : rawValue;
+
+    try {
+      const session = JSON.parse(value) as { access_token?: unknown };
+      if (typeof session.access_token === "string") {
+        return session.access_token;
+      }
+    } catch {
+      continue;
+    }
+  }
+
+  return null;
 }
 
 export async function getAuthState(): Promise<AuthState> {
@@ -54,16 +95,22 @@ export async function getAuthState(): Promise<AuthState> {
     return { status: "anonymous" };
   }
 
-  const supabase = await createClient();
-  const { data, error } = await supabase.auth.getSession();
-  const session = data.session;
+  const accessToken = await getAccessToken();
 
-  if (error || !session?.user) {
+  if (!accessToken) {
     return { status: "anonymous" };
   }
 
-  const id = session.user.id;
-  const email = session.user.email ?? "";
+  const supabase = await createClient();
+  const { data, error } = await supabase.auth.getUser(accessToken);
+  const user = data.user;
+
+  if (error || !user) {
+    return { status: "anonymous" };
+  }
+
+  const id = user.id;
+  const email = user.email ?? "";
   let profile = await loadProfile(supabase, id);
 
   if (!profile) {

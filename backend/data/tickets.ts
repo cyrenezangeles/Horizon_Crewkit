@@ -1,5 +1,6 @@
 import "server-only";
 
+import { getCacheNow } from "@/backend/cache-time";
 import { createClient } from "@/backend/supabase/server";
 import { TICKET_BUCKET } from "@/backend/storage";
 import {
@@ -22,9 +23,10 @@ let directoryCache: {
 } | null = null;
 
 export async function getDirectory(): Promise<Map<string, TicketPerson>> {
+  const now = await getCacheNow();
   const supabase = await createClient();
 
-  if (directoryCache && directoryCache.expiresAt > Date.now()) {
+  if (directoryCache && directoryCache.expiresAt > now) {
     return directoryCache.value;
   }
 
@@ -48,7 +50,7 @@ export async function getDirectory(): Promise<Map<string, TicketPerson>> {
 
   directoryCache = {
     value: directory,
-    expiresAt: Date.now() + DIRECTORY_TTL_MS,
+    expiresAt: now + DIRECTORY_TTL_MS,
   };
 
   return directory;
@@ -128,8 +130,9 @@ export async function getTicketStatusCounts(): Promise<
 export function countResolvedSince(
   tickets: TicketWithPeople[],
   days: number,
+  now: number,
 ): number {
-  const cutoff = Date.now() - days * 86_400_000;
+  const cutoff = now - days * 86_400_000;
 
   return tickets.filter((ticket) => {
     if (!ticket.resolved_at) {

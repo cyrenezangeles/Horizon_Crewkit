@@ -1,8 +1,8 @@
 import Link from "next/link";
 import { ArrowUpRight, Eye } from "lucide-react";
 import { Badge } from "@/frontend/components/ui";
+import { RelativeTime } from "@/frontend/components/relative-time";
 import type { ArticleListItem } from "@/backend/types";
-import { timeAgo } from "@/frontend/lib/utils";
 
 export function ArticleCard({ article }: { article: ArticleListItem }) {
   const category = article.categories;
@@ -46,7 +46,7 @@ export function ArticleCard({ article }: { article: ArticleListItem }) {
           </span>
         ))}
         <span className="ml-auto text-[11px] text-slate-400">
-          Updated {timeAgo(article.updated_at)}
+          Updated <RelativeTime value={article.updated_at} />
         </span>
       </div>
     </Link>

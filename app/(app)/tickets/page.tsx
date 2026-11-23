@@ -22,7 +22,8 @@ import {
   TICKET_STATUS_LABELS,
   type TicketStatus,
 } from "@/backend/types";
-import { cn, timeAgo } from "@/frontend/lib/utils";
+import { cn } from "@/frontend/lib/utils";
+import { RelativeTime } from "@/frontend/components/relative-time";
 
 export const metadata: Metadata = {
   title: "Tickets",
@@ -164,7 +165,7 @@ export default async function TicketsPage({
                 <PriorityBadge priority={ticket.priority} />
                 <CategoryBadge category={ticket.category} />
                 <span className="ml-auto text-[11px] text-slate-400">
-                  Updated {timeAgo(ticket.updated_at)}
+                  Updated <RelativeTime value={ticket.updated_at} />
                 </span>
               </div>
 

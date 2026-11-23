@@ -2,7 +2,6 @@
 
 import { useActionState, useEffect, useState } from "react";
 import {
-  ArrowRight,
   Eye,
   EyeOff,
   Loader2,
@@ -116,10 +115,7 @@ export function LoginForm({ next }: { next: string }) {
               Signing in...
             </>
           ) : (
-            <>
-              Sign in
-              <ArrowRight className="h-4 w-4" />
-            </>
+            "Sign in"
           )}
         </button>
 

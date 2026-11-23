@@ -1,5 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { Suspense } from "react";
+import { connection } from "next/server";
 import {
   ArrowRight,
   BookOpen,
@@ -15,18 +17,28 @@ import {
   Users,
 } from "lucide-react";
 import { Badge, ButtonLink } from "@/frontend/components/ui";
+import { RelativeTime } from "@/frontend/components/relative-time";
 import { StatusBadge } from "@/frontend/components/ticket-badges";
+import { getCacheNow } from "@/backend/cache-time";
 import { requireHr } from "@/backend/auth";
 import { listArticlesForAdmin } from "@/backend/data/kb";
 import { countResolvedSince, listTickets } from "@/backend/data/tickets";
 import { createClient } from "@/backend/supabase/server";
-import { timeAgo } from "@/frontend/lib/utils";
 
 export const metadata: Metadata = {
   title: "HR dashboard",
 };
 
-export default async function AdminPage() {
+export default function AdminPage() {
+  return (
+    <Suspense fallback={<AdminSkeleton />}>
+      <AdminDashboard />
+    </Suspense>
+  );
+}
+
+async function AdminDashboard() {
+  await connection();
   await requireHr();
 
   const supabase = await createClient();
@@ -62,7 +74,7 @@ export default async function AdminPage() {
   const members = membersResult.data?.length ?? 0;
   const recentTickets = tickets.slice(0, 5);
   const recentArticles = articles.slice(0, 5);
-  const resolvedThisWeek = countResolvedSince(tickets, 7);
+  const resolvedThisWeek = countResolvedSince(tickets, 7, await getCacheNow());
 
   const stats = [
     {
@@ -110,7 +122,7 @@ export default async function AdminPage() {
             HR dashboard
           </h1>
           <p className="mt-1 max-w-xl text-sm text-slate-500">
-            A calm overview of the queue and the knowledge base.
+            A calm overview of the queue and your team&apos;s content.
           </p>
         </div>
         <div className="flex flex-wrap items-center gap-2">
@@ -189,7 +201,7 @@ export default async function AdminPage() {
                     </p>
                     <p className="text-[11px] text-slate-400">
                       {ticket.requester?.full_name ?? "Unknown requester"} Â·{" "}
-                      {timeAgo(ticket.updated_at)}
+                      <RelativeTime value={ticket.updated_at} />
                     </p>
                   </div>
                   <StatusBadge status={ticket.status} />
@@ -270,13 +282,6 @@ export default async function AdminPage() {
                 <MessageSquare className="mb-2 h-4 w-4 text-blue-500" />
                 Triage queue
               </Link>
-              <Link
-                href="/kb"
-                className="focus-ring rounded-xl border border-slate-200 bg-white/70 p-3 text-xs font-medium text-slate-600 transition hover:border-blue-200 hover:text-blue-700"
-              >
-                <BookOpen className="mb-2 h-4 w-4 text-blue-500" />
-                Open knowledge base
-              </Link>
             </div>
           </section>
         </div>
@@ -317,7 +322,7 @@ export default async function AdminPage() {
                   </Link>
                   <p className="text-[11px] text-slate-400">
                     {article.categories?.name ?? "Uncategorized"} Â· updated{" "}
-                    {timeAgo(article.updated_at)}
+                    <RelativeTime value={article.updated_at} />
                   </p>
                 </div>
                 {article.status === "published" ? (
@@ -334,6 +339,23 @@ export default async function AdminPage() {
           </p>
         )}
       </section>
+    </div>
+  );
+}
+
+function AdminSkeleton() {
+  return (
+    <div className="space-y-6">
+      <div className="h-9 w-56 animate-pulse rounded-xl bg-slate-200/70" />
+      <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+        {Array.from({ length: 4 }).map((_, index) => (
+          <div
+            key={index}
+            className="h-32 animate-pulse rounded-2xl bg-white/60"
+          />
+        ))}
+      </div>
+      <div className="h-64 animate-pulse rounded-2xl bg-white/60" />
     </div>
   );
 }

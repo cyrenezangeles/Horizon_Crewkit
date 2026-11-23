@@ -10,7 +10,7 @@ import { Sidebar } from "@/frontend/components/sidebar";
 
 export default async function AppLayout({ children }: LayoutProps<"/">) {
   return (
-    <div className="mx-auto flex min-h-dvh w-full max-w-[1600px]">
+    <div className="flex min-h-dvh w-full">
       <Suspense fallback={<SidebarSkeleton />}>
         <SidebarSection />
       </Suspense>
@@ -22,46 +22,32 @@ export default async function AppLayout({ children }: LayoutProps<"/">) {
               <Brand compact />
             </div>
 
-            <form
-              action="/kb"
-              className="relative ml-auto hidden w-full max-w-sm sm:block lg:ml-0"
-            >
-              <Search className="pointer-events-none absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
-              <input
-                type="search"
-                name="q"
-                placeholder="Search articles, tags, topics..."
-                className="focus-ring w-full rounded-xl border border-slate-200 bg-white/80 py-2 pl-10 pr-3 text-sm text-slate-900 placeholder:text-slate-400 transition focus:border-blue-400"
-              />
-            </form>
-
-            <Link
-              href="/kb"
-              aria-label="Search the knowledge base"
-              className="focus-ring ml-auto rounded-xl border border-slate-200 bg-white/80 p-2 text-slate-500 transition hover:text-blue-600 sm:hidden"
-            >
-              <Search className="h-4 w-4" />
-            </Link>
+            <Suspense fallback={<HeaderSearchSkeleton />}>
+              <HeaderSearch />
+            </Suspense>
 
             <Suspense fallback={<HeaderUserSkeleton />}>
               <HeaderUser />
             </Suspense>
           </div>
-
-          <div className="border-t border-white/60 px-4 pb-2 pt-2 sm:px-6 lg:hidden">
-            <Suspense fallback={<div className="h-[46px]" />}>
-              <MobileNav />
-            </Suspense>
-          </div>
         </header>
 
-        <main className="flex-1 px-4 py-6 sm:px-6 lg:px-8 lg:py-8">
+        <main className="flex-1 px-4 pb-24 pt-6 sm:px-6 lg:px-8 lg:pb-8 lg:pt-8">
           {children}
         </main>
 
-        <footer className="border-t border-white/60 px-4 py-5 text-xs text-slate-400 sm:px-6 lg:px-8">
+        <footer className="border-t border-white/60 px-4 pb-24 pt-5 text-xs text-slate-400 sm:px-6 lg:px-8 lg:pb-5">
           Horizon Crewkit &middot; Built for fast answers and calmer support.
         </footer>
+      </div>
+
+      <div
+        className="fixed inset-x-0 bottom-0 z-40 border-t border-blue-800/40 bg-gradient-to-r from-blue-700 to-indigo-700 px-2 pt-1 shadow-[0_-12px_30px_-24px_rgba(15,23,42,0.65)] lg:hidden"
+        style={{ paddingBottom: "max(env(safe-area-inset-bottom), 0.25rem)" }}
+      >
+        <Suspense fallback={<div className="h-14" />}>
+          <MobileNav />
+        </Suspense>
       </div>
     </div>
   );
@@ -94,23 +80,65 @@ async function HeaderUser() {
   );
 }
 
+async function HeaderSearch() {
+  const user = await requireUser();
+
+  if (user.role === "hr") {
+    return null;
+  }
+
+  return (
+    <>
+      <form
+        action="/kb"
+        className="relative ml-auto hidden w-full max-w-sm sm:block lg:ml-0"
+      >
+        <Search className="pointer-events-none absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
+        <input
+          type="search"
+          name="q"
+          placeholder="Search articles, tags, topics..."
+          className="focus-ring w-full rounded-xl border border-slate-200 bg-white/80 py-2 pl-10 pr-3 text-sm text-slate-900 placeholder:text-slate-400 transition focus:border-blue-400"
+        />
+      </form>
+
+      <Link
+        href="/kb"
+        aria-label="Search the knowledge base"
+        className="focus-ring ml-auto rounded-xl border border-slate-200 bg-white/80 p-2 text-slate-500 transition hover:text-blue-600 sm:hidden"
+      >
+        <Search className="h-4 w-4" />
+      </Link>
+    </>
+  );
+}
+
+function HeaderSearchSkeleton() {
+  return (
+    <>
+      <div className="ml-auto hidden h-9 w-full max-w-sm animate-pulse rounded-xl bg-white/60 sm:block lg:ml-0" />
+      <div className="ml-auto h-9 w-9 animate-pulse rounded-xl bg-white/60 sm:hidden" />
+    </>
+  );
+}
+
 async function MobileNav() {
   const user = await requireUser();
-  return <NavLinks role={user.role} orientation="horizontal" />;
+  return <NavLinks role={user.role} orientation="bottom" inverted />;
 }
 
 function SidebarSkeleton() {
   return (
-    <aside className="sticky top-0 hidden h-dvh w-64 shrink-0 flex-col border-r border-white/70 px-4 py-6 lg:flex">
+    <aside className="sticky top-0 hidden h-dvh w-64 shrink-0 flex-col border-r border-blue-800/40 bg-gradient-to-b from-blue-700 via-blue-700 to-indigo-700 px-4 py-6 lg:flex">
       <div className="flex items-center justify-between">
-        <div className="h-8 w-32 animate-pulse rounded-lg bg-slate-200/70" />
-        <div className="h-7 w-7 animate-pulse rounded-lg bg-slate-200/70" />
+        <div className="h-8 w-32 animate-pulse rounded-lg bg-white/20" />
+        <div className="h-7 w-7 animate-pulse rounded-lg bg-white/20" />
       </div>
       <div className="mt-8 space-y-2">
         {Array.from({ length: 4 }).map((_, index) => (
           <div
             key={index}
-            className="h-10 animate-pulse rounded-xl bg-slate-200/70"
+            className="h-10 animate-pulse rounded-xl bg-white/15"
           />
         ))}
       </div>

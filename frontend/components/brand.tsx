@@ -1,16 +1,21 @@
+import Image from "next/image";
 import Link from "next/link";
-import { LifeBuoy } from "lucide-react";
+import horizonLogo from "../../logo pic/logo.png";
 import { cn } from "@/frontend/lib/utils";
 
 export function CrewkitMark({ className }: { className?: string }) {
   return (
     <span
       className={cn(
-        "inline-flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-blue-500 via-blue-600 to-indigo-600 text-white shadow-[0_10px_22px_-10px_rgba(37,99,235,0.9)]",
+        "inline-flex h-9 w-9 items-center justify-center overflow-hidden rounded-xl bg-white shadow-[0_10px_22px_-10px_rgba(15,23,42,0.35)] ring-1 ring-slate-200/70",
         className,
       )}
     >
-      <LifeBuoy className="h-[18px] w-[18px]" strokeWidth={2.2} />
+      <Image
+        src={horizonLogo}
+        alt="Horizon Crewkit"
+        className="h-full w-full object-contain"
+      />
     </span>
   );
 }
@@ -31,9 +36,7 @@ export function Brand({
       href={href}
       className={cn("group inline-flex items-center gap-2.5", className)}
     >
-      <CrewkitMark
-        className={inverted ? "bg-white/15 shadow-none ring-1 ring-white/25" : undefined}
-      />
+      <CrewkitMark />
       {compact ? null : (
         <span className="flex flex-col leading-none">
           <span

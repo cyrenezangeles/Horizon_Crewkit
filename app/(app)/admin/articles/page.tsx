@@ -4,8 +4,9 @@ import { Eye, FileText, PencilLine, Plus } from "lucide-react";
 import { Badge, ButtonLink, EmptyState } from "@/frontend/components/ui";
 import { requireHr } from "@/backend/auth";
 import { listArticlesForAdmin } from "@/backend/data/kb";
-import { cn, timeAgo } from "@/frontend/lib/utils";
+import { cn } from "@/frontend/lib/utils";
 import { DeleteArticleButton } from "@/frontend/components/delete-article-button";
+import { RelativeTime } from "@/frontend/components/relative-time";
 
 export const metadata: Metadata = {
   title: "Manage articles",
@@ -139,7 +140,9 @@ export default async function AdminArticlesPage({
                     <Eye className="h-3.5 w-3.5" />
                     {article.view_count}
                   </span>
-                  <span>{timeAgo(article.updated_at)}</span>
+                  <span>
+                    <RelativeTime value={article.updated_at} />
+                  </span>
                 </div>
 
                 <div className="flex items-center gap-1 sm:shrink-0">
